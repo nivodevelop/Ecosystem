@@ -164,7 +164,6 @@ function Card({ card, overlay }: { card: BoardCard; overlay?: boolean }) {
         )}
       </div>
       <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-muted">
-        <span className="chip bg-panel-3 text-muted">{card.platform === "IOS" ? "iOS" : "Android"}</span>
         <span className="chip bg-panel-3 text-muted">{card.localeCount} лок.</span>
       </div>
     </Link>

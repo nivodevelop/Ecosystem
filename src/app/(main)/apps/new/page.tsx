@@ -21,14 +21,7 @@ export default async function NewAppPage() {
           <label className="label">Подзаголовок (до 30 символов)</label>
           <input className="input" name="subtitle" maxLength={30} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="label">Платформа</label>
-            <select className="input" name="platform">
-              <option value="IOS">iOS</option>
-              <option value="ANDROID">Android</option>
-            </select>
-          </div>
+        <div>
           <div>
             <label className="label">Основная локаль</label>
             <select className="input" name="primaryLocale" defaultValue="en-US">
@@ -39,7 +32,7 @@ export default async function NewAppPage() {
           </div>
         </div>
         <div>
-          <label className="label">Bundle ID / Package name</label>
+          <label className="label">Bundle ID</label>
           <input className="input" name="bundleId" placeholder="com.company.app" />
         </div>
         <div>

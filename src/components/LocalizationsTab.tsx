@@ -15,18 +15,6 @@ type Props = {
   provider: string;
 };
 
-const storeOf = (code: string) => LOCALES.find((l) => l.code === code);
-
-function StoreChips({ locale }: { locale?: StoreLocale }) {
-  if (!locale) return null;
-  return (
-    <span className="flex gap-1">
-      {locale.appStore && <span className="chip bg-sky-500/10 text-sky-300" title={`App Store: ${locale.appStore}`}>iOS</span>}
-      {locale.googlePlay && <span className="chip bg-emerald-500/10 text-emerald-300" title={`Google Play: ${locale.googlePlay}`}>GP</span>}
-    </span>
-  );
-}
-
 export function LocalizationsTab(props: Props) {
   const { appId, primaryLocale, localizations, editable } = props;
   const current = localizations.find((l) => l.locale === props.selected) ?? localizations.find((l) => l.locale === primaryLocale);
@@ -78,7 +66,6 @@ function Editor({ loc, appId, primaryLocale, editable }: Props & { loc: Localiza
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-lg font-semibold">{localeName(loc.locale)}</h2>
         <span className="text-sm text-faint">{loc.locale}</span>
-        <StoreChips locale={storeOf(loc.locale)} />
         {editable && loc.locale !== primaryLocale && (
           <div className="ml-auto flex gap-2">
             <button type="button" className="btn-secondary" onClick={() => setPrimaryLocale(appId, loc.locale)}>
@@ -154,8 +141,6 @@ function AddLocales({ appId, primaryLocale, localizations, provider }: Props) {
       <div className="flex flex-wrap items-center gap-1.5">
         <input className="input mr-auto w-44 py-1.5" placeholder="Поиск" value={query} onChange={(e) => setQuery(e.target.value)} />
         <button type="button" className="btn-ghost" onClick={() => pick(available)}>Все</button>
-        <button type="button" className="btn-ghost" onClick={() => pick(available.filter((l) => l.appStore))}>App Store</button>
-        <button type="button" className="btn-ghost" onClick={() => pick(available.filter((l) => l.googlePlay))}>Google Play</button>
         <button type="button" className="btn-ghost" onClick={() => setPicked([])}>Снять</button>
       </div>
       <div className="grid max-h-52 grid-cols-1 gap-x-3 overflow-y-auto rounded-xl border border-line bg-bg/40 p-2 text-sm sm:grid-cols-2">
@@ -163,7 +148,7 @@ function AddLocales({ appId, primaryLocale, localizations, provider }: Props) {
           <label key={l.code} className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 hover:bg-panel-2">
             <input type="checkbox" className="check" name="locales" value={l.code} checked={picked.includes(l.code)} onChange={() => toggle(l.code)} />
             <span className="truncate">{l.name}</span>
-            <span className="ml-auto"><StoreChips locale={l} /></span>
+            <span className="ml-auto text-xs text-faint">{l.code}</span>
           </label>
         ))}
         {shown.length === 0 && (

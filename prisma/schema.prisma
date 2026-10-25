@@ -24,11 +24,6 @@ model Stage {
   toLinks   StageChange[] @relation("toStage")
 }
 
-enum Platform {
-  IOS
-  ANDROID
-}
-
 model User {
   id           String        @id @default(cuid())
   email        String        @unique
@@ -42,7 +37,6 @@ model User {
 
 model App {
   id               String            @id @default(cuid())
-  platform         Platform          @default(IOS)
   bundleId         String?
   storeUrl         String?
   developerAccount String?

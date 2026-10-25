@@ -2,14 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Platform } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { isLocale } from "@/lib/locales";
 import { deleteFile, saveImage } from "@/lib/storage";
 
-const platformOf = (v: FormDataEntryValue | null): Platform => (v === "ANDROID" ? "ANDROID" : "IOS");
 const opt = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim();
   return s ? s : null;
@@ -28,7 +26,6 @@ export async function createApp(form: FormData) {
   const top = await db.app.findFirst({ where: { stageId: firstStage.id }, orderBy: { position: "asc" } });
   const app = await db.app.create({
     data: {
-      platform: platformOf(form.get("platform")),
       bundleId: opt(form.get("bundleId")),
       primaryLocale,
       stageId: firstStage.id,
@@ -59,7 +56,6 @@ export async function updateApp(appId: string, form: FormData) {
   await db.app.update({
     where: { id: appId },
     data: {
-      platform: platformOf(form.get("platform")),
       bundleId: opt(form.get("bundleId")),
       storeUrl: opt(form.get("storeUrl")),
       developerAccount: opt(form.get("developerAccount")),

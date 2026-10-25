@@ -59,7 +59,6 @@ export default async function AppPage({
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="text-sm text-muted">{primary?.subtitle || "—"}</p>
           <div className="mt-2 flex gap-1.5">
-            <span className="chip bg-panel-3 text-muted">{app.platform === "IOS" ? "iOS" : "Android"}</span>
             {app.bundleId && <span className="chip bg-panel-3 normal-case text-muted">{app.bundleId}</span>}
             <span className="chip" style={{ background: `${app.stage.color}22`, color: app.stage.color }}>{app.stage.name}</span>
           </div>
@@ -94,22 +93,15 @@ export default async function AppPage({
               <fieldset disabled={!editable} className="space-y-5">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="label">Платформа</label>
-                    <select className="input" name="platform" defaultValue={app.platform}>
-                      <option value="IOS">iOS</option>
-                      <option value="ANDROID">Android</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="label">Bundle ID / Package name</label>
+                    <label className="label">Bundle ID</label>
                     <input className="input" name="bundleId" defaultValue={app.bundleId ?? ""} />
                   </div>
                   <div>
-                    <label className="label">Аккаунт разработчика</label>
+                    <label className="label">Аккаунт App Store Connect</label>
                     <input className="input" name="developerAccount" defaultValue={app.developerAccount ?? ""} />
                   </div>
                   <div>
-                    <label className="label">Ссылка в сторе</label>
+                    <label className="label">Ссылка в App Store</label>
                     <input className="input" name="storeUrl" type="url" defaultValue={app.storeUrl ?? ""} />
                   </div>
                 </div>

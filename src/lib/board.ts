@@ -10,7 +10,6 @@ export type BoardCard = {
   title: string;
   subtitle: string;
   icon: string | null;
-  platform: "IOS" | "ANDROID";
   shots: string[];
   localeCount: number;
 };
@@ -39,7 +38,6 @@ export async function loadBoard(): Promise<BoardCard[]> {
       title: primary?.title || "Без названия",
       subtitle: primary?.subtitle ?? "",
       icon: app.iconPath,
-      platform: app.platform,
       shots,
       localeCount: app.localizations.length,
     };

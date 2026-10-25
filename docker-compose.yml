@@ -9,6 +9,22 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  # Само приложение (для своего сервера): docker compose --profile app up -d --build
+  app:
+    build: .
+    profiles: ["app"]
+    depends_on: [db]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/traffic
+      AUTH_SECRET: ${AUTH_SECRET:?задайте AUTH_SECRET в .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin12345}
+      LIBRETRANSLATE_URL: ${LIBRETRANSLATE_URL:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - files:/data
+
   # Бесплатный переводчик на своём сервере (open source, без ключей и лимитов).
   # Первый запуск скачивает языковые модели (несколько ГБ) и занимает время.
   # Запуск: docker compose --profile translate up -d, затем LIBRETRANSLATE_URL=http://localhost:5000 в .env
@@ -21,5 +37,6 @@ services:
       - lt-models:/home/libretranslate/.local
 
 volumes:
+  files:
   pgdata:
   lt-models:

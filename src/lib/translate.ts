@@ -1,5 +1,6 @@
 import "server-only";
 import { LOCALIZED_FIELDS, type LocalizedField } from "./locales";
+import { fitListing } from "./fit";
 
 export type LocalizedTexts = Record<LocalizedField, string>;
 
@@ -105,7 +106,7 @@ export async function translateListing(
   source: LocalizedTexts,
   sourceLocale: string,
   targetLocale: string,
-): Promise<LocalizedTexts> {
+): Promise<{ texts: LocalizedTexts; trimmed: LocalizedField[] }> {
   const fields = LOCALIZED_FIELDS.filter((f) => source[f].trim());
   const texts = fields.map((f) => (f === "keywords" ? keywordsIn(source[f]) : source[f]));
   let translated: string[];
@@ -120,7 +121,8 @@ export async function translateListing(
   fields.forEach((f, i) => {
     result[f] = f === "keywords" ? keywordsOut(translated[i] ?? "") : (translated[i] ?? "");
   });
-  return result;
+  // Перевод обычно длиннее оригинала — обрезаем по лимитам App Store
+  return fitListing(result);
 }
 
 // Запускает задачи параллельно, но не больше `limit` одновременно
