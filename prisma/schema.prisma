@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum Stage {
+  DEVELOPMENT
+  FIRST_REVIEW
+  REJECTED
+  LIVE_WHITE
+  TECH_UPDATE
+  SCREENSHOTS
+  WORKING
+  BLOCKED
+}
+
+enum Platform {
+  IOS
+  ANDROID
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  role         Role          @default(MEMBER)
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  stageChanges StageChange[]
+}
+
+model App {
+  id               String            @id @default(cuid())
+  platform         Platform          @default(IOS)
+  bundleId         String?
+  storeUrl         String?
+  developerAccount String?
+  notes            String?
+  iconPath         String?
+  primaryLocale    String            @default("en-US")
+  stage            Stage             @default(DEVELOPMENT)
+  position         Float             @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  localizations    Localization[]
+  screenshots      Screenshot[]
+  localeShots      LocaleScreenshot[]
+  stageChanges     StageChange[]
+
+  @@index([stage, position])
+}
+
+model Localization {
+  id          String   @id @default(cuid())
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  locale      String
+  title       String   @default("")
+  subtitle    String   @default("")
+  promoText   String   @default("")
+  description String   @default("")
+  keywords    String   @default("")
+  whatsNew    String   @default("")
+  // Заполнено автопереводом и ещё не проверено человеком
+  autoTranslated Boolean @default(false)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([appId, locale])
+}
+
+// Загруженный файл скриншота (библиотека приложения)
+model Screenshot {
+  id           String             @id @default(cuid())
+  appId        String
+  app          App                @relation(fields: [appId], references: [id], onDelete: Cascade)
+  path         String
+  originalName String
+  createdAt    DateTime           @default(now())
+  placements   LocaleScreenshot[]
+}
+
+// Порядок скриншотов в конкретной локали
+model LocaleScreenshot {
+  id           String     @id @default(cuid())
+  appId        String
+  app          App        @relation(fields: [appId], references: [id], onDelete: Cascade)
+  locale       String
+  screenshotId String
+  screenshot   Screenshot @relation(fields: [screenshotId], references: [id], onDelete: Cascade)
+  sortOrder    Int
+
+  @@unique([appId, locale, sortOrder])
+  @@index([appId, locale])
+}
+
+model StageChange {
+  id        String   @id @default(cuid())
+  appId     String
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  fromStage Stage?
+  toStage   Stage
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([appId, createdAt])
+}

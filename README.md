@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Traffic Hub
 
-## Getting Started
+Внутренняя экосистема агентства: канбан приложений по этапам, локализации с автопереводом,
+наборы скриншотов по локалям, роли сотрудников.
 
-First, run the development server:
+## Что умеет (MVP)
+
+- **Роли.** Админ: всё, включая пользователей и удаление приложений. Менеджер: создаёт и
+  редактирует приложения, локализации, скрины. Сотрудник: видит доску и двигает карточки.
+- **Канбан** с этапами: Разработка, Первичная модерация, Реджект, Белая в сторе,
+  Техническое обновление, Скрины, Работающая, Заблокированная. Карточка: иконка, название,
+  подзаголовок и первые 3 скрина основной локали. Перетаскивание между колонками и внутри
+  колонки, история переходов (кто и когда).
+- **Страница приложения:** основные данные (платформа, bundle ID, аккаунт, ссылка, заметки,
+  иконка), смена этапа, история.
+- **Локализации:** 39 локалей App Store, поля с лимитами символов стора (название 30,
+  подзаголовок 30, ключи 100 и т. д.), подсветка превышения. Добавление локалей с
+  автопереводом из любой существующей и повторный перевод выбранных локалей. Переведённые
+  автоматически помечаются «авто», пока их не проверит и не сохранит человек.
+- **Скрины:** загрузка пачкой, сборка набора кликами, порядок перетаскиванием,
+  применение набора к отмеченным локалям (до 10 в локали).
+- **Вкладка «Позиции»** (только админ) пока заглушка — отслеживание ключей следующим этапом.
+
+## Стек
+
+Next.js 15 (App Router, server actions), TypeScript, Tailwind, PostgreSQL + Prisma,
+dnd-kit. Автоперевод через Claude API. Файлы хранятся на диске (`STORAGE_DIR`).
+
+## Запуск локально
+
+Нужны Node.js 20+ и PostgreSQL (можно через Docker).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up -d            # PostgreSQL на localhost:5432
+cp .env.example .env            # и поменяйте AUTH_SECRET
+npm install
+npx prisma migrate deploy       # создать таблицы
+npm run db:seed                 # первый админ: admin@example.com / admin12345
+npm run dev                     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Свой логин для первого админа: `ADMIN_EMAIL=... ADMIN_PASSWORD=... npm run db:seed`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Переменные окружения
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Переменная | Назначение |
+|---|---|
+| `DATABASE_URL` | строка подключения PostgreSQL |
+| `AUTH_SECRET` | секрет для подписи сессий, длинная случайная строка |
+| `STORAGE_DIR` | папка для иконок и скринов (по умолчанию `./storage`) |
+| `ANTHROPIC_API_KEY` | ключ Claude API для автоперевода; без него автоперевод выключен |
 
-## Learn More
+## Продакшен
 
-To learn more about Next.js, take a look at the following resources:
+`npm run build && npm start` на любом VPS с PostgreSQL. Папку `STORAGE_DIR` нужно
+положить на постоянный диск и бэкапить вместе с базой. Для Vercel и подобных
+платформ без постоянного диска хранилище надо перевести на S3/R2 (`src/lib/storage.ts`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Структура
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `prisma/schema.prisma` — модель данных
+- `src/actions/` — серверные действия (приложения, локализации, скрины, пользователи)
+- `src/components/` — доска, вкладки локализаций и скринов
+- `src/lib/` — авторизация, права, локали и лимиты, перевод, хранилище
 
-## Deploy on Vercel
+## Дальше
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Позиции по ключевым словам по странам (ASO-сервис с API)
+- Выгрузка текстов и скринов в App Store Connect / Google Play
+- Наборы скринов по типам устройств (iPhone 6.9", iPad, Android)
+- Комментарии и уведомления по приложениям
