@@ -80,6 +80,12 @@ npm run dev                     # http://localhost:3000
 4. Settings → Volumes: добавить том с путём `/data` (там иконки и скрины).
 5. Settings → Networking → Generate Domain. Это и есть ссылка.
 
+### Render
+
+В репозитории есть `render.yaml`. Render → New → Blueprint → выбрать репозиторий, указать
+`ADMIN_EMAIL` и `ADMIN_PASSWORD` (почта и пароль первого админа), `LIBRETRANSLATE_URL` можно
+оставить пустым. Render сам создаст базу, диск и выдаст адрес вида `https://ecosystem-xxxx.onrender.com`.
+
 ### Свой сервер
 
 ```bash
