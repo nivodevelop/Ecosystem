@@ -1,22 +1,27 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
-import { loadBoard } from "@/lib/board";
+import { loadBoard, loadStages } from "@/lib/board";
 import { Board } from "@/components/Board";
 
 export default async function BoardPage() {
   const user = await requireUser();
-  const cards = await loadBoard();
+  const [stages, cards] = await Promise.all([loadStages(), loadBoard()]);
   return (
-    <main className="p-4">
-      <div className="mb-4 flex items-center gap-3">
-        <h1 className="text-lg font-semibold">Приложения</h1>
-        <span className="text-sm text-gray-500">{cards.length}</span>
-        {can.editApp(user.role) && (
-          <Link href="/apps/new" className="btn ml-auto">+ Новое приложение</Link>
-        )}
+    <main className="px-5 py-6">
+      <div className="mb-6 flex flex-wrap items-end gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Приложения</h1>
+          <p className="mt-1 text-sm text-muted">
+            {cards.length} в работе · {stages.length} этапов
+          </p>
+        </div>
+        <div className="ml-auto flex gap-2">
+          {can.manageStages(user.role) && <Link href="/stages" className="btn-secondary">Настроить этапы</Link>}
+          {can.editApp(user.role) && <Link href="/apps/new" className="btn">+ Новое приложение</Link>}
+        </div>
       </div>
-      <Board initialCards={cards} canMove={can.moveCard(user.role)} />
+      <Board stages={stages} initialCards={cards} canMove={can.moveCard(user.role)} />
     </main>
   );
 }

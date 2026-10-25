@@ -12,5 +12,6 @@ export const can = {
   editApp: (r: Role) => r === "ADMIN" || r === "MANAGER",
   deleteApp: (r: Role) => r === "ADMIN",
   manageUsers: (r: Role) => r === "ADMIN",
+  manageStages: (r: Role) => r === "ADMIN",
   viewPositions: (r: Role) => r === "ADMIN",
 };

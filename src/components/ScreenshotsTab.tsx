@@ -61,18 +61,18 @@ export function ScreenshotsTab({ appId, primaryLocale, screenshots, locales, set
           action={(fd) => startTransition(() => uploadScreenshots(appId, fd))}
           className="card flex flex-wrap items-center gap-3 p-4"
         >
-          <span className="text-sm font-medium">Загрузить скрины</span>
-          <input type="file" name="files" multiple accept="image/png,image/jpeg,image/webp" className="text-sm" required />
+          <span className="font-medium">Загрузить скрины</span>
+          <input type="file" name="files" multiple accept="image/png,image/jpeg,image/webp" className="text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-panel-3 file:px-3 file:py-1.5 file:text-fg" required />
           <button className="btn ml-auto" disabled={pending}>{pending ? "Загружаем…" : "Загрузить"}</button>
         </form>
       )}
 
-      <section className="card p-4">
+      <section className="card p-5">
         <h3 className="mb-1 text-sm font-medium">Все загруженные скрины ({screenshots.length})</h3>
-        <p className="mb-3 text-xs text-gray-500">
+        <p className="mb-3 text-xs text-muted">
           {editable ? "Нажмите на скрин, чтобы добавить его в набор или убрать из набора." : "Загруженные скрины приложения."}
         </p>
-        {screenshots.length === 0 && <p className="text-sm text-gray-500">Пока ничего не загружено.</p>}
+        {screenshots.length === 0 && <p className="text-sm text-muted">Пока ничего не загружено.</p>}
         <div className="flex flex-wrap gap-3">
           {screenshots.map((s) => {
             const n = draft.indexOf(s.id);
@@ -82,20 +82,20 @@ export function ScreenshotsTab({ appId, primaryLocale, screenshots, locales, set
                   type="button"
                   disabled={!editable}
                   onClick={() => toggleShot(s.id)}
-                  className={`block w-full overflow-hidden rounded-md border-2 ${n >= 0 ? "border-gray-900" : "border-transparent"}`}
+                  className={`block w-full overflow-hidden rounded-lg border-2 ${n >= 0 ? "border-accent" : "border-transparent"}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={fileUrl(s.path)!} alt={s.name} className="aspect-[9/19.5] w-full object-cover" />
                 </button>
                 {n >= 0 && (
-                  <span className="absolute left-1 top-1 rounded-full bg-gray-900 px-1.5 text-xs text-white">{n + 1}</span>
+                  <span className="absolute left-1 top-1 rounded-full bg-accent px-1.5 text-xs font-semibold text-white">{n + 1}</span>
                 )}
                 {editable && (
                   <button
                     type="button"
                     title="Удалить скрин"
                     onClick={() => confirm("Удалить скрин из всех локалей?") && startTransition(() => deleteScreenshot(appId, s.id))}
-                    className="absolute right-1 top-1 hidden rounded bg-white/90 px-1 text-xs text-red-600 group-hover:block"
+                    className="absolute right-1 top-1 hidden rounded bg-black/70 px-1 text-xs text-red-400 group-hover:block"
                   >
                     ✕
                   </button>
@@ -109,13 +109,13 @@ export function ScreenshotsTab({ appId, primaryLocale, screenshots, locales, set
       {editable && (
         <section className="card space-y-4 p-4">
           <div>
-            <h3 className="text-sm font-medium">Набор: порядок скринов</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="font-medium">Набор: порядок скринов</h3>
+            <p className="text-xs text-muted">
               Перетаскивайте, чтобы поменять порядок. Первые {BOARD_SHOTS} видны в карточке на доске. Максимум {MAX_SHOTS_PER_LOCALE}.
             </p>
           </div>
           {draft.length === 0 ? (
-            <p className="text-sm text-gray-500">Набор пуст. Выберите скрины выше или загрузите набор из локали ниже.</p>
+            <p className="text-sm text-muted">Набор пуст. Выберите скрины выше или загрузите набор из локали ниже.</p>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext items={draft} strategy={horizontalListSortingStrategy}>
@@ -131,16 +131,21 @@ export function ScreenshotsTab({ appId, primaryLocale, screenshots, locales, set
           )}
 
           <div>
-            <div className="mb-1 flex items-center gap-3">
-              <span className="text-sm font-medium">Применить к локалям</span>
-              <button type="button" className="text-xs text-gray-500 underline" onClick={() => setTargets(locales)}>все</button>
-              <button type="button" className="text-xs text-gray-500 underline" onClick={() => setTargets([])}>снять</button>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="font-medium">Применить к локалям</span>
+              <span className="text-xs text-faint">выбрано {targets.length} из {locales.length}</span>
+              <button type="button" className="btn-ghost ml-auto" onClick={() => setTargets(locales)}>Все</button>
+              <button type="button" className="btn-ghost" onClick={() => setTargets(locales.filter((l) => !setsByLocale.has(l)))}>
+                Без скринов
+              </button>
+              <button type="button" className="btn-ghost" onClick={() => setTargets([])}>Снять</button>
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <div className="grid max-h-52 grid-cols-1 gap-x-3 overflow-y-auto rounded-xl border border-line bg-bg/40 p-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
               {locales.map((l) => (
-                <label key={l} className="flex items-center gap-1.5">
-                  <input type="checkbox" checked={targets.includes(l)} onChange={() => toggleLocale(l)} />
-                  {localeName(l)}
+                <label key={l} className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 hover:bg-panel-2">
+                  <input type="checkbox" className="check" checked={targets.includes(l)} onChange={() => toggleLocale(l)} />
+                  <span className="truncate">{localeName(l)}</span>
+                  {setsByLocale.has(l) && <span className="ml-auto text-xs text-faint">{setsByLocale.get(l)!.length}</span>}
                 </label>
               ))}
             </div>
@@ -149,26 +154,25 @@ export function ScreenshotsTab({ appId, primaryLocale, screenshots, locales, set
             <button type="button" className="btn" onClick={apply} disabled={pending || targets.length === 0}>
               {pending ? "Применяем…" : "Применить набор"}
             </button>
-            {message && <span className={`text-sm ${message.ok ? "text-emerald-700" : "text-red-600"}`}>{message.text}</span>}
+            {message && <span className={`text-sm ${message.ok ? "text-emerald-400" : "text-red-400"}`}>{message.text}</span>}
           </div>
         </section>
       )}
 
-      <section className="card divide-y divide-gray-100">
-        <h3 className="px-4 py-3 text-sm font-medium">Скрины по локалям</h3>
-        {locales.map((l) => {
+      <section className="card divide-y divide-line">
+        <h3 className="px-5 py-3 font-medium">Скрины по локалям</h3>
+        {locales.filter((l) => setsByLocale.has(l)).map((l) => {
           const ids = setsByLocale.get(l) ?? [];
           return (
-            <div key={l} className="flex items-center gap-3 px-4 py-2">
-              <span className="w-48 shrink-0 text-sm">
-                {localeName(l)} <span className="text-xs text-gray-400">{l}</span>
+            <div key={l} className="flex items-center gap-3 px-5 py-2.5">
+              <span className="w-56 shrink-0 text-sm">
+                {localeName(l)} <span className="text-xs text-faint">{l}</span>
               </span>
               <div className="flex gap-1.5 overflow-x-auto">
-                {ids.length === 0 && <span className="text-xs text-gray-400">нет скринов</span>}
                 {ids.map((id) =>
                   byId.has(id) ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img key={id} src={fileUrl(byId.get(id)!.path)!} alt="" className="h-16 rounded border border-gray-200" />
+                    <img key={id} src={fileUrl(byId.get(id)!.path)!} alt="" className="h-16 rounded-md ring-1 ring-white/10" />
                   ) : null,
                 )}
               </div>
@@ -188,6 +192,11 @@ export function ScreenshotsTab({ appId, primaryLocale, screenshots, locales, set
             </div>
           );
         })}
+        {locales.some((l) => !setsByLocale.has(l)) && (
+          <p className="px-5 py-3 text-sm text-faint">
+            Без скринов: {locales.filter((l) => !setsByLocale.has(l)).map(localeName).join(", ")}
+          </p>
+        )}
       </section>
     </div>
   );
@@ -204,13 +213,13 @@ function SortableShot({ shot, index, onRemove }: { shot: Shot; index: number; on
       {...listeners}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={fileUrl(shot.path)!} alt="" draggable={false} className="aspect-[9/19.5] w-full rounded-md border border-gray-300 object-cover" />
-      <span className="absolute left-1 top-1 rounded-full bg-gray-900 px-1.5 text-xs text-white">{index + 1}</span>
+      <img src={fileUrl(shot.path)!} alt="" draggable={false} className="aspect-[9/19.5] w-full rounded-md border border-line-strong object-cover" />
+      <span className="absolute left-1 top-1 rounded-full bg-accent px-1.5 text-xs font-semibold text-white">{index + 1}</span>
       <button
         type="button"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={onRemove}
-        className="absolute right-1 top-1 rounded bg-white/90 px-1 text-xs"
+        className="absolute right-1 top-1 rounded bg-black/70 px-1 text-xs"
         title="Убрать из набора"
       >
         ✕

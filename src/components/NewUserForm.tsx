@@ -29,7 +29,7 @@ export function NewUserForm() {
         </select>
       </div>
       <button className="btn" disabled={pending}>Добавить</button>
-      {state && <p className={`w-full text-sm ${state.ok ? "text-emerald-700" : "text-red-600"}`}>{state.message}</p>}
+      {state && <p className={`w-full text-sm ${state.ok ? "text-emerald-400" : "text-red-400"}`}>{state.message}</p>}
     </form>
   );
 }

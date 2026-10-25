@@ -2,15 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Platform, Stage } from "@prisma/client";
+import type { Platform } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/permissions";
-import { STAGES } from "@/lib/stages";
 import { isLocale } from "@/lib/locales";
 import { deleteFile, saveImage } from "@/lib/storage";
 
-const isStage = (s: string): s is Stage => STAGES.some((x) => x.id === s);
 const platformOf = (v: FormDataEntryValue | null): Platform => (v === "ANDROID" ? "ANDROID" : "IOS");
 const opt = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim();
@@ -24,17 +22,21 @@ export async function createApp(form: FormData) {
   if (!title) throw new Error("Укажите название");
   if (!isLocale(primaryLocale)) throw new Error("Неизвестная локаль");
 
-  const top = await db.app.findFirst({ where: { stage: "DEVELOPMENT" }, orderBy: { position: "asc" } });
+  // Новое приложение попадает в первую колонку
+  const firstStage = await db.stage.findFirst({ orderBy: { sortOrder: "asc" } });
+  if (!firstStage) throw new Error("Нет ни одного этапа");
+  const top = await db.app.findFirst({ where: { stageId: firstStage.id }, orderBy: { position: "asc" } });
   const app = await db.app.create({
     data: {
       platform: platformOf(form.get("platform")),
       bundleId: opt(form.get("bundleId")),
       primaryLocale,
+      stageId: firstStage.id,
       position: (top?.position ?? 0) - 1,
       localizations: {
         create: { locale: primaryLocale, title, subtitle: String(form.get("subtitle") ?? "").trim() },
       },
-      stageChanges: { create: { toStage: "DEVELOPMENT", userId: user.id } },
+      stageChanges: { create: { toStageId: firstStage.id, toStageName: firstStage.name, userId: user.id } },
     },
   });
   const icon = form.get("icon");
@@ -69,15 +71,16 @@ export async function updateApp(appId: string, form: FormData) {
   revalidatePath(`/apps/${appId}`);
 }
 
-export async function moveApp(appId: string, stage: string, beforeAppId: string | null) {
+export async function moveApp(appId: string, stageId: string, beforeAppId: string | null) {
   const user = await requirePermission(can.moveCard);
-  if (!isStage(stage)) throw new Error("Неизвестный этап");
-  const app = await db.app.findUniqueOrThrow({ where: { id: appId } });
+  const stage = await db.stage.findUnique({ where: { id: stageId } });
+  if (!stage) throw new Error("Неизвестный этап");
+  const app = await db.app.findUniqueOrThrow({ where: { id: appId }, include: { stage: true } });
 
   // Позиция: перед указанной карточкой или в конец колонки
   let position: number;
   const column = await db.app.findMany({
-    where: { stage, NOT: { id: appId } },
+    where: { stageId, NOT: { id: appId } },
     orderBy: { position: "asc" },
     select: { id: true, position: true },
   });
@@ -87,9 +90,20 @@ export async function moveApp(appId: string, stage: string, beforeAppId: string 
   else position = (column[idx - 1].position + column[idx].position) / 2;
 
   await db.$transaction([
-    db.app.update({ where: { id: appId }, data: { stage, position } }),
-    ...(app.stage !== stage
-      ? [db.stageChange.create({ data: { appId, fromStage: app.stage, toStage: stage, userId: user.id } })]
+    db.app.update({ where: { id: appId }, data: { stageId, position } }),
+    ...(app.stageId !== stageId
+      ? [
+          db.stageChange.create({
+            data: {
+              appId,
+              fromStageId: app.stageId,
+              fromStageName: app.stage.name,
+              toStageId: stageId,
+              toStageName: stage.name,
+              userId: user.id,
+            },
+          }),
+        ]
       : []),
   ]);
   revalidatePath("/");

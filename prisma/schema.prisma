@@ -13,15 +13,15 @@ enum Role {
   MEMBER
 }
 
-enum Stage {
-  DEVELOPMENT
-  FIRST_REVIEW
-  REJECTED
-  LIVE_WHITE
-  TECH_UPDATE
-  SCREENSHOTS
-  WORKING
-  BLOCKED
+// Колонка канбана. Список, названия, цвета и порядок редактирует админ.
+model Stage {
+  id        String        @id @default(cuid())
+  name      String
+  color     String        @default("#64748b")
+  sortOrder Int
+  apps      App[]
+  fromLinks StageChange[] @relation("fromStage")
+  toLinks   StageChange[] @relation("toStage")
 }
 
 enum Platform {
@@ -49,7 +49,8 @@ model App {
   notes            String?
   iconPath         String?
   primaryLocale    String            @default("en-US")
-  stage            Stage             @default(DEVELOPMENT)
+  stageId          String
+  stage            Stage             @relation(fields: [stageId], references: [id], onDelete: Restrict)
   position         Float             @default(0)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -58,7 +59,7 @@ model App {
   localeShots      LocaleScreenshot[]
   stageChanges     StageChange[]
 
-  @@index([stage, position])
+  @@index([stageId, position])
 }
 
 model Localization {
@@ -108,8 +109,13 @@ model StageChange {
   id        String   @id @default(cuid())
   appId     String
   app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
-  fromStage Stage?
-  toStage   Stage
+  // Название этапа сохраняется на момент перехода, чтобы история не ломалась при переименовании или удалении
+  fromStageId   String?
+  fromStage     Stage?   @relation("fromStage", fields: [fromStageId], references: [id], onDelete: SetNull)
+  fromStageName String?
+  toStageId     String?
+  toStage       Stage?   @relation("toStage", fields: [toStageId], references: [id], onDelete: SetNull)
+  toStageName   String
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())

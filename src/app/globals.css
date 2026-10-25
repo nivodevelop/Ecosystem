@@ -1,31 +1,69 @@
 @import "tailwindcss";
 
+@theme {
+  --color-bg: #0a0b10;
+  --color-panel: #11131a;
+  --color-panel-2: #171a23;
+  --color-panel-3: #1e2230;
+  --color-line: #232736;
+  --color-line-strong: #323849;
+  --color-fg: #e8eaf1;
+  --color-muted: #8b92a8;
+  --color-faint: #5c6378;
+  --color-accent: #7c5cff;
+  --color-accent-2: #22d3ee;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
-  background: #f4f5f7;
-  color: #111827;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgb(124 92 255 / 0.12), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgb(34 211 238 / 0.07), transparent 60%),
+    var(--color-bg);
+  background-attachment: fixed;
+  color: var(--color-fg);
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgb(124 92 255 / 0.4);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-b from-[#8b6dff] to-[#6a4cf0] px-3.5 py-2 text-sm font-medium text-white shadow-[0_0_0_1px_rgb(124_92_255/0.5),0_6px_20px_-6px_rgb(124_92_255/0.7)] transition hover:brightness-110 disabled:opacity-40 disabled:shadow-none;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line-strong bg-panel-2 px-3.5 py-2 text-sm font-medium text-fg transition hover:border-faint hover:bg-panel-3 disabled:opacity-40;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-1 rounded-md border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2 text-sm font-medium text-red-300 transition hover:bg-red-500/20 disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-md px-2 py-1 text-xs text-muted transition hover:bg-panel-3 hover:text-fg;
   }
   .input {
-    @apply w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900;
+    @apply w-full rounded-lg border border-line-strong bg-bg/60 px-3 py-2 text-sm text-fg placeholder:text-faint outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/25 disabled:opacity-60;
   }
   .label {
-    @apply mb-1 block text-xs font-medium text-gray-600;
+    @apply mb-1.5 block text-xs font-medium tracking-wide text-muted;
   }
   .card {
-    @apply rounded-lg border border-gray-200 bg-white;
+    @apply rounded-2xl border border-line bg-panel/80 backdrop-blur;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium;
+  }
+  .check {
+    @apply h-4 w-4 shrink-0 accent-[#7c5cff];
   }
 }

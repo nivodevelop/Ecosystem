@@ -9,5 +9,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  # Бесплатный переводчик на своём сервере (open source, без ключей и лимитов).
+  # Первый запуск скачивает языковые модели (несколько ГБ) и занимает время.
+  # Запуск: docker compose --profile translate up -d, затем LIBRETRANSLATE_URL=http://localhost:5000 в .env
+  translate:
+    image: libretranslate/libretranslate:latest
+    profiles: ["translate"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - lt-models:/home/libretranslate/.local
+
 volumes:
   pgdata:
+  lt-models:

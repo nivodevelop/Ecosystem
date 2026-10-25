@@ -2,9 +2,11 @@ import "server-only";
 import { db } from "./db";
 import { BOARD_SHOTS } from "./locales";
 
+export type BoardStage = { id: string; name: string; color: string };
+
 export type BoardCard = {
   id: string;
-  stage: string;
+  stageId: string;
   title: string;
   subtitle: string;
   icon: string | null;
@@ -12,6 +14,9 @@ export type BoardCard = {
   shots: string[];
   localeCount: number;
 };
+
+export const loadStages = (): Promise<BoardStage[]> =>
+  db.stage.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true, color: true } });
 
 export async function loadBoard(): Promise<BoardCard[]> {
   const apps = await db.app.findMany({
@@ -30,7 +35,7 @@ export async function loadBoard(): Promise<BoardCard[]> {
       .slice(0, BOARD_SHOTS);
     return {
       id: app.id,
-      stage: app.stage,
+      stageId: app.stageId,
       title: primary?.title || "Без названия",
       subtitle: primary?.subtitle ?? "",
       icon: app.iconPath,
