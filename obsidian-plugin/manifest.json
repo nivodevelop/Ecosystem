@@ -1,0 +1,9 @@
+{
+  "id": "traffic-hub",
+  "name": "Traffic Hub",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Канбан приложений App Store, локализации с бесплатным автопереводом и обрезкой по лимитам Apple, наборы скринов по локалям.",
+  "author": "Traffic Team",
+  "isDesktopOnly": false
+}

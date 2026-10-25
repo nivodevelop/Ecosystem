@@ -1,0 +1,26 @@
+{
+  "name": "traffic-hub-obsidian",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Traffic Hub: канбан приложений App Store, локализации с автопереводом и скрины по локалям внутри Obsidian",
+  "scripts": {
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs",
+    "test": "tsx test/fit.test.ts"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "esbuild": "^0.28.2",
+    "obsidian": "^1.14.4",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "yaml": "^2.9.1"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
